@@ -29,3 +29,6 @@ def try_password(password, print_all=False):
 with open('nist_10000.txt', newline='') as bad_passwords:
     nist_bad = bad_passwords.read().split('\n')
 print(nist_bad[1:10])
+for password in nist_bad:
+    if try_password(password):
+        break
