@@ -1,34 +1,29 @@
-# This method can be used to send a login post 
-# request to our server
-# returns True if 200 success on login attempt
-# returns False otherwise (failure, errors)
+from flask import Flask, request, abort
+import hashlib
 
-import requests
-def try_password(password, print_all=False):
-    # specify where to make the request
-    url = 'http://127.0.0.1:5000/login'
+app = Flask(__name__)
+
+# make a post request
+# it should include a json body 
+# with a password paramater as a string
+@app.route('/login', methods=['POST'])
+def headers():
+    data = request.get_json()
+    # invalid input format
+    if('password' not in data):
+        abort(422)
+    elif(type(data['password']) is not str):
+        abort(422)
+
+    # check password
+    # hash the password
+    # > this is technically not plain text
+    # > you'll learn about hashing soon
+    # > we didn't want to make it easy for you to cheat ;)
+    digest = hashlib.md5(data['password'].encode()).hexdigest()
     
-    # define the payload for the post request
-    payload = {'password': password}
-    
-    # make the request
-    r = requests.post(url, json=payload)
-    
-    # print some results (http status code)
-    if(print_all):
-        print(payload['password'] + ":" + str(r.status_code))
-    
-    # determine if we've gained access 200 = success!
-    if(r.status_code == 200):
-        print("the password is: " + payload['password'])
-        return True
+    # compare the password to the message digest
+    if(digest == '2f3a4fccca6406e35bcf33e92dd93135'):
+        return "ACCESS GRANTED"
     else:
-        return False
-
-# Load the NIST list of 10,000 most commonly used passwords (strings)
-with open('nist_10000.txt', newline='') as bad_passwords:
-    nist_bad = bad_passwords.read().split('\n')
-print(nist_bad[1:10])
-for password in nist_bad:
-    if try_password(password):
-        break
+        abort(401)
